@@ -1,11 +1,18 @@
-// SET CANVAS
+// SET CANVAS SKY
 var canvas = document.querySelector("#sky");
-var ctx = canvas.getContext("2d");
+var ctxSky = canvas.getContext("2d");
 var W = window.innerWidth;
 var H = window.innerHeight;
 canvas.width= W;
 canvas.height = H;
 
+// SET CANVAS GAME
+var canvas = document.querySelector("#game");
+var ctxGame = canvas.getContext("2d");
+var W = window.innerWidth;
+var H = window.innerHeight;
+canvas.width= W;
+canvas.height = H;
 
 
 //LOAD IMAGES RESSOURCES
@@ -27,7 +34,7 @@ class Letter {
     this.height = height;
     }
     draw(){
-    ctx.drawImage(letterImg, this.x, this.y, this.width, this.height);
+      ctxGame.drawImage(letterImg, this.x, this.y, this.width, this.height);
     }
 }
 
@@ -57,7 +64,7 @@ var santa = {
     height: 150,
     image: santaImg,
     draw(){
-      ctx.drawImage(this.image, this.x, this.y, this.width, this.height)},
+      ctxGame.drawImage(this.image, this.x, this.y, this.width, this.height)},
 }
 
 // CREATE SNOW TOP
@@ -68,23 +75,25 @@ var snow = {
     height: 300,
     image: snowImg,
     draw(){
-      ctx.drawImage(this.image, this.x, this.y, this.width, this.height)},
+      ctxGame.drawImage(this.image, this.x, this.y, this.width, this.height)},
 }
 
-
-// CREATE BACKGROUND ANIMATION
-    //code 
 
 //CREATE SCORE COUNTER
 var score = 8;
 var scoreDiv = {
 draw(){
-ctx.beginPath(); 
-ctx.arc(1500, 120, 60, 0, 2 * Math.PI);
-ctx.strokeStyle = "white";
-ctx.lineWidth = 6;
-ctx.stroke();
-ctx.closePath();
+  ctxGame.beginPath(); 
+  ctxGame.arc(1500, 120, 60, 0, 2 * Math.PI);
+  ctxGame.strokeStyle = "white";
+  ctxGame.lineWidth = 6;
+  ctxGame.stroke();
+  ctxGame.font = "bold 70px monospace";
+  ctxGame.fillStyle = "white";
+  ctxGame.textAlign = "center";
+  ctxGame.textBaseline = "middle";
+  ctxGame.fillText("8", 1497, 120);
+  ctxGame.closePath();
 }
 }
 
@@ -106,16 +115,16 @@ function back(){
     
     //draw flakes on canvas
     function drawFlakes(){
-      ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = "white";
-      ctx.beginPath();
+      ctxSky.clearRect(0, 0, W, H);
+      ctxSky.fillStyle = "white";
+      ctxSky.beginPath();
       for(var i = 0; i < maxflakes; i++){
         var flake = flakes[i];
-        ctx.moveTo(flake.x, flake.y);
-        ctx.arc(flake.x, flake.y, flake.r, 0, Math.PI*2, true);    
+        ctxSky.moveTo(flake.x, flake.y);
+        ctxSky.arc(flake.x, flake.y, flake.r, 0, Math.PI*2, true);    
       }
       
-      ctx.fill();
+      ctxSky.fill();
       moveFlakes();
     }
       var angle= 0;
@@ -129,7 +138,7 @@ function back(){
             //math.sin va créer un effet sinusoidal dans les coordonnées de l'angle, afin de donner une chute plus réaliste.
           flake.x += Math.sin(angle) * 2;
           //when flake disspaears, send a new one from top
-          if(flake.y > H){
+          if(flake.y > 700){
             flakes[i] = {
               x: Math.random()*W,
               y: 0,
@@ -145,13 +154,14 @@ function back(){
 
 // DRAWING GAME
 function drawEverything(){
-    ctx.fillStyle ="#102a54";//background
-    ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle= "#F7F4FA";
-    ctx.fillRect(0, 710, W, 210);//snow-bottom
+    ctxGame.fillStyle ="#102a54";//background
+    ctxGame.fillRect(0, 0, W, H);
+    ctxGame.fillStyle= "#F7F4FA";
+    ctxGame.fillRect(0, 710, W, 210);//snow-bottom
     santa.draw();
     scoreDiv.draw();
     snow.draw();
+    
     letters.forEach(oneletter =>{
         oneletter.draw();
 })
@@ -159,7 +169,7 @@ function drawEverything(){
 
 // DRAWING LOOP
 function drawingLoop(){
-    ctx.clearRect(0, 0, W, H);
+    ctxGame.clearRect(0, 0, W, H);
     drawEverything();
     requestAnimationFrame(function (){
         drawingLoop(); 
