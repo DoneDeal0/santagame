@@ -16,8 +16,14 @@ canvas.height = H;
 
 
 //LOAD IMAGES RESSOURCES
+var laugh = new Audio ("./music/santa-ohoh.mp3");
+//pour la lancer sur evenement laugh.play();
+
+
+
+//LOAD IMAGES RESSOURCES
 var santaImg = new Image ();
-santaImg.src = "./images/santa.png";
+santaImg.src = ["./images/santa.png"];
 
 var snowImg = new Image ();
 snowImg.src = "./images/snow.png";
@@ -34,27 +40,32 @@ class Letter {
     this.height = height;
     }
     draw(){
+        if (score>0){
+        this.y +=1;
+      }
+      if(this.y > H){
+        this.y = -500;
+        score-=1;
+      }
       ctxGame.drawImage(letterImg, this.x, this.y, this.width, this.height);
     }
 }
 
+
+
 var letters = [
-new Letter (letterX, 0, 50, 50),
-new Letter (letterX, 0, 50, 50),
-new Letter (letterX, 0, 50, 50),
-new Letter (letterX, 0, 50, 50),
-new Letter (letterX, 0, 50, 50),
-new Letter (letterX, 0, 50, 50),
-new Letter (letterX, 0, 50, 50),
-new Letter (letterX, 0, 50, 50),
-new Letter (letterX, 0, 50, 50),
-new Letter (letterX, 0, 50, 50),
+new Letter (Math.floor(Math.random()* W), 0, 50, 50),
+new Letter (Math.floor(Math.random()* W), -200, 50, 50),
+new Letter (Math.floor(Math.random()* W), -400, 50, 50),
+new Letter (Math.floor(Math.random()* W), -600, 50, 50),
+new Letter (Math.floor(Math.random()* W), -900, 50, 50),
+new Letter (Math.floor(Math.random()* W), -1100, 50, 50),
+new Letter (Math.floor(Math.random()* W), -1300, 50, 50),
+new Letter (Math.floor(Math.random()* W), -1500, 50, 50),
+new Letter (Math.floor(Math.random()* W), -1700, 50, 50),
+new Letter (Math.floor(Math.random()* W), -1900, 50, 50),
 ]
 
-
-var letterX = function(){
-return Math.floor(Math.random()* W)
-};
 
 // CREATE SANTA
 var santa = {
@@ -64,8 +75,10 @@ var santa = {
     height: 150,
     image: santaImg,
     draw(){
-      ctxGame.drawImage(this.image, this.x, this.y, this.width, this.height)},
-}
+      //for (i=0; i<santaImg.length; i++){
+        ctxGame.drawImage(this.image, this.x, this.y, this.width, this.height)}
+      }    
+
 
 // CREATE SNOW TOP
 var snow = {
@@ -92,7 +105,7 @@ draw(){
   ctxGame.fillStyle = "white";
   ctxGame.textAlign = "center";
   ctxGame.textBaseline = "middle";
-  ctxGame.fillText("8", 1497, 120);
+  ctxGame.fillText(score, 1497, 120);
   ctxGame.closePath();
 }
 }
@@ -146,13 +159,28 @@ function back(){
               d: flake.d};
           }
         }
-      }
-        
+      }     
         setInterval(drawFlakes, 25);
   }
 
 
-// DRAWING GAME
+//CHECK COLISION
+//function checkCollision(){
+ //if(letter.y = 555){
+  // score-= 1;}}
+
+//code if santa x/y = letter x/x
+//score +=1
+//if letter.y === snow.y 
+//score-=1
+//if score === 20 ==> display "you win + merryChristmas.wav"
+//if score === 0 ==> display "game + low pitched hohoho.wav"
+// change circle color depending on score
+
+
+
+
+// DRAWING ON CANVAS GAME
 function drawEverything(){
     ctxGame.fillStyle ="#102a54";//background
     ctxGame.fillRect(0, 0, W, H);
@@ -161,10 +189,13 @@ function drawEverything(){
     santa.draw();
     scoreDiv.draw();
     snow.draw();
-    
-    letters.forEach(oneletter =>{
-        oneletter.draw();
-})
+
+   letters.forEach(oneletter =>{
+       oneletter.draw();
+       if (checkCollision (santa, oneletter)){
+         score+=1;
+       }
+      })
 };
 
 // DRAWING LOOP
@@ -178,6 +209,14 @@ function drawingLoop(){
 
 drawingLoop();
 back();
+
+
+function checkCollision(rectA, rectB){
+  return rectA.y + rectA.height >= rectB.y && 
+  rectA.y <= rectB.y + rectB.height &&
+  rectA.x + rectA.width >= rectB.x &&
+  rectA.x <= rectB.x + rectB.width;
+};
 
 
 // SET GAME CONTROL 
