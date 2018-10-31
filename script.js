@@ -1,3 +1,16 @@
+//var home = document.querySelector(".home")
+
+//function init(){
+
+backgroundMusic = new Audio("./music/santa-loop.wav");
+backgroundMusic.addEventListener('ended', function() {
+  this.currentTime = 0;
+  this.play();
+}, false);
+backgroundMusic.play();
+
+//home.style.display= "none";
+
 // SET CANVAS SKY
 var canvas = document.querySelector("#sky");
 var ctxSky = canvas.getContext("2d");
@@ -42,6 +55,13 @@ angryLetterImg.src = "./images/angryletter.png";
 var letterCatch = new Image ();
 letterCatch.src = "./images/spritecatch.png";
 
+var gameoverImg = new Image();
+gameoverImg.src= "./images/gameover.jpg";
+
+var winImg = new Image();
+winImg.src= "./images/win.jpg";
+
+
 // CREATE LETTERS
 class Letter {
     constructor (x, y, width, height){
@@ -77,28 +97,6 @@ new Letter (Math.floor(Math.random()* W), -1700, 50, 50),
 new Letter (Math.floor(Math.random()* W), -1900, 50, 50),
 ]
 
-//CREATE EXPLOSION SPRITE
-var letterHit = {
-  x: 500,
-  y: 500,
-  width: 150,
-  height: 150,
-  spriteX: 0,
-  spriteY: 103,
-  image: letterCatch,
-  draw() {
-    ctxGame.drawImage(letterCatch, this.spriteX, this.spriteY, this.width, this.height, this.x, this.y, this.width, this.height)
-    setInterval(function () {
-      letterCatch.spriteX += 128;
-      if (letterCatch.spriteX === 640){
-        letterCatch.spriteX = 0;
-      }
-      //if (letterCatch.spriteX === 640) {
-        //return;}
-      },1000);  
-}
-}
-
 // CREATE ANGRY LETTERS
 class AngryLetter {
   constructor (x, y, width, height){
@@ -126,19 +124,43 @@ new AngryLetter (Math.floor(Math.random()* W), -1800, 50, 50),
 new AngryLetter (Math.floor(Math.random()* W), -2300, 50, 50),
 ]
 
+//CREATE EXPLOSION SPRITE
+var letterHit = {
+  x: 500, 
+  y: 500,
+  width: 150,
+  height: 150,
+  spriteX: 0,
+  spriteY: 103,
+  image: letterCatch,
+  draw() {
+    ctxGame.drawImage(letterCatch, this.spriteX, this.spriteY, this.width, this.height, this.x, this.y, this.width, this.height)
+    setInterval(function () {
+      letterHit.spriteX += 128;
+      if (letterHit.spriteX === 640){
+        letterHit.spriteX = 0;
+      }
+      },1000);  
+}
+}
+
 
 // CREATE SANTA
 var santa = {
     x: 300, 
-    y: 575,
+    y: 572,
     width: 150,
     height: 150,
     spriteX: 0,
     spriteY: 450,
     image: santaImg,
     walkInterval: null,
+    flashInterval: null,
+    visible: true,
     draw(){
-        ctxGame.drawImage(this.image, this.spriteX, this.spriteY, this.width, this.height, this.x, this.y, this.width, this.height)
+        if (this.visible) {
+          ctxGame.drawImage(this.image, this.spriteX, this.spriteY, this.width, this.height, this.x, this.y, this.width, this.height)
+        }
     },
     stopWalking() {
       clearInterval(this.walkInterval);
@@ -162,6 +184,19 @@ var santa = {
           }
         }
       }, 75);
+    },
+
+    santaClick (){
+      var count = 0;
+      this.flashInterval = setInterval(function () {
+        santa.visible = !santa.visible;
+        count++;
+
+        if (count === 6) {
+          clearInterval(santa.flashInterval);
+          santa.visible = true;
+        }
+      }, 150);
     }
   }    
 
@@ -180,10 +215,28 @@ var snow = {
 
 //CREATE SCORE COUNTER
 var score = 8;
+var radius = 60;
+var zoomInterval = null;
 var scoreDiv = {
+
+
+  scoreZoom (){
+    var radiusList = [61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60];
+    var count = 0;
+   zoomInterval = setInterval(function () {
+      radius = radiusList[count]; 
+      count++;
+
+      if (count === radiusList.length) {
+        clearInterval(zoomInterval);
+      }
+    }, 50);
+  },
+
 draw(){
+  if (visible = true){
   ctxGame.beginPath(); 
-  ctxGame.arc(1500, 120, 60, 0, 2 * Math.PI);
+  ctxGame.arc(1500, 120, radius, 0, 2 * Math.PI);
   //change circle color depending on score
   if (score>15){
     ctxGame.strokeStyle = "#42f462"; 
@@ -233,6 +286,8 @@ draw(){
   ctxGame.fillText(score, 1497, 120);
   ctxGame.closePath();
 }
+
+}
 }
 
 
@@ -273,7 +328,7 @@ function back(){
           var flake = flakes[i];
           //Update flake x,y.
           flake.y += Math.pow(flake.d, 2) + 1,
-            //math.sin va créer un effet sinusoidal dans les coordonnées de l'angle, afin de donner une chute plus réaliste.
+            //math.sin creates a sinusoidal effect in x,y => more realistic fall..
           flake.x += Math.sin(angle) * 2;
           //when flake disspaears, send a new one from top
           if(flake.y > 700){
@@ -298,14 +353,23 @@ function drawEverything(){
     santa.draw();
     scoreDiv.draw();
     snow.draw();
-    //letterHit.draw();
 
    letters.forEach(oneletter =>{
        oneletter.draw();
        if (!oneletter.caught && checkCollision (santa, oneletter)){
          score+=1;
          oneletter.caught = true;
+         letterHit.x= oneletter.x;
+         letterHit.y= oneletter.y;
+         letterHit.draw();    
          bell.play();
+         if (score === 10 || score === 15){
+          scoreDiv.scoreZoom ();
+         }
+         letters.push(new Letter (Math.floor(Math.random()* W), 0, 50, 50));
+
+
+        
     setTimeout(function(){
       bell.pause();
       bell.currentTime= 0;
@@ -313,13 +377,31 @@ function drawEverything(){
        }
       })
 
+      letters = letters.filter (oneletter =>{
+        return !oneletter.caught 
+      })
+
     angryLetters.forEach(aletter =>{
         aletter.draw();
         if (!aletter.caught && checkCollision (santa, aletter)){
           score-=3;
           aletter.caught = true;
+          santa.santaClick();
+          scoreDiv.scoreClick();
         }
        })
+if (score===0){
+  ctxGame.drawImage(gameoverImg, 600, 100, 560, 700);
+  ctxGame.font = "bold 25px monospace";
+  ctxGame.fillText("PRESS ENTER TO PLAY AGAIN", 880, 70);
+  return;
+}
+
+if (score===20){
+  ctxGame.drawImage(winImg, 600, 100, 560, 700);
+  ctxGame.font = "bold 25px monospace";
+  ctxGame.fillText("PRESS ENTER TO PLAY AGAIN", 880, 70);
+}
 };
 
 // DRAWING LOOP
@@ -335,36 +417,71 @@ drawingLoop();
 back();
 
 
-function checkCollision(rectA, rectB){
-  return rectA.y + rectA.height >= rectB.y && 
-  rectA.y <= rectB.y + rectB.height &&
-  rectA.x + rectA.width >= rectB.x &&
-  rectA.x <= rectB.x + rectB.width;
+function checkCollision(a, b){
+  return a.y + a.height >= b.y && 
+  a.y <= b.y + b.height &&
+  a.x + a.width >= b.x &&
+  a.x <= b.x + b.width;
 };
 
 
 // SET GAME CONTROL 
 document.onkeydown = function (event){
-    if(score === 20 || score === 0){
-        return;
-    }
+  santa.startWalking();
+  switch (event.keyCode){
+    case 37: //<=
+    santa.image = santaReverse;
+    santa.x -= 20;
+    break;
 
-    santa.startWalking();
+    case 39: //=>
+    santa.image = santaImg;
+    santa.x += 20;
+    break;
 
-    switch (event.keyCode){
-        case 37: //<=
-        santa.image = santaReverse;
-        santa.x -= 20;
-        break;
+    case 13: //ENTER
+    restart();
+    break;
+}
+  
 
-        case 39: //=>
-        santa.image = santaImg;
-        santa.x += 20;
-        break;
-    }
+  if (score===20 || score===0){
+    return;
+  }
+
+    
 };
 
 
 document.onkeyup = function (){
   santa.stopWalking();
 };
+
+
+function restart(){
+  score = 8; 
+  santa.x = 300; 
+  santa.y = 572;
+  santa.stopWalking();
+
+  angryLetters = [
+    new AngryLetter (Math.floor(Math.random()* W), 1100, 50, 50),
+    new AngryLetter (Math.floor(Math.random()* W), -1800, 50, 50),
+    new AngryLetter (Math.floor(Math.random()* W), -2300, 50, 50),
+    ];
+
+  letters = [
+      new Letter (Math.floor(Math.random()* W), 0, 50, 50),
+      new Letter (Math.floor(Math.random()* W), -200, 50, 50),
+      new Letter (Math.floor(Math.random()* W), -400, 50, 50),
+      new Letter (Math.floor(Math.random()* W), -600, 50, 50),
+      new Letter (Math.floor(Math.random()* W), -900, 50, 50),
+      new Letter (Math.floor(Math.random()* W), -1100, 50, 50),
+      new Letter (Math.floor(Math.random()* W), -1300, 50, 50),
+      new Letter (Math.floor(Math.random()* W), -1500, 50, 50),
+      new Letter (Math.floor(Math.random()* W), -1700, 50, 50),
+      new Letter (Math.floor(Math.random()* W), -1900, 50, 50),
+      ];
+}
+
+//};

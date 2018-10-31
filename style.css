@@ -16,3 +16,11 @@ canvas  {
     left: 0;
     width: 100%;
 }
+
+
+.home{
+    background-color: red;
+    width: 100vw;
+    height: 100vh
+}
+
