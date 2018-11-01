@@ -346,7 +346,6 @@ function back(){
         setInterval(drawFlakes, 25);
   }
 
-
 // DRAWING ON CANVAS GAME
 function drawEverything(){
     ctxGame.fillStyle ="#102a54";//background
@@ -356,6 +355,20 @@ function drawEverything(){
     santa.draw();
     scoreDiv.draw();
     snow.draw();
+
+    if (score<=0){
+      ctxGame.drawImage(gameoverImg, 600, 100, 560, 700);
+      ctxGame.font = "bold 25px monospace";
+      ctxGame.fillText("PRESS ENTER TO PLAY AGAIN", 880, 70);
+      return;
+    }
+    
+    if (score >= 20){
+      ctxGame.drawImage(winImg, 600, 100, 560, 700);
+      ctxGame.font = "bold 25px monospace";
+      ctxGame.fillText("PRESS ENTER TO PLAY AGAIN", 880, 70);
+      return;
+    }
 
    letters.forEach(oneletter =>{
        oneletter.draw();
@@ -398,19 +411,6 @@ function drawEverything(){
             }, 2000);
         }
        })
-if (score<=0){
-  ctxGame.drawImage(gameoverImg, 600, 100, 560, 700);
-  ctxGame.font = "bold 25px monospace";
-  ctxGame.fillText("PRESS ENTER TO PLAY AGAIN", 880, 70);
-  return;
-}
-
-if (score===20){
-  ctxGame.drawImage(winImg, 600, 100, 560, 700);
-  ctxGame.font = "bold 25px monospace";
-  ctxGame.fillText("PRESS ENTER TO PLAY AGAIN", 880, 70);
-  return;
-}
 };
 
 // DRAWING LOOP
@@ -442,7 +442,7 @@ document.onkeydown = function (event){
     break;
   }
 
-  if (score===20 || score<=0){
+  if (score>=20 || score<=0){
     return;
   } 
   santa.startWalking();
