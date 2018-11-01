@@ -1,16 +1,3 @@
-//var home = document.querySelector(".home")
-
-//function init(){
-
-backgroundMusic = new Audio("./music/santa-loop.wav");
-backgroundMusic.addEventListener('ended', function() {
-  this.currentTime = 0;
-  this.play();
-}, false);
-backgroundMusic.play();
-
-//home.style.display= "none";
-
 // SET CANVAS SKY
 var canvas = document.querySelector("#sky");
 var ctxSky = canvas.getContext("2d");
@@ -29,12 +16,12 @@ canvas.height = H;
 
 
 //LOAD AUDIO RESSOURCES
-var laugh = new Audio ("./music/santa-laugh.wav");
-var laughLow = new Audio ("./music/santa-lowlaugh.wav");
-var goodboy = new Audio ("./music/santa-goodboy.wav");
-var merry = new Audio ("./music/santa-merry.wav");
-var bell = new Audio ("./music/santa-bell.wav");
-
+var laugh = new Audio ("./music/santa-laugh.mp3");
+var laughLow = new Audio ("./music/santa-lowlaugh.mp3");
+var goodboy = new Audio ("./music/santa-goodboy.mp3");
+var merry = new Audio ("./music/santa-merry.mp3");
+var bell = new Audio ("./music/santa-bell.mp3");
+var pain = new Audio ("./music/santa-pain.mp3");
 
 //LOAD IMAGES RESSOURCES
 var santaImg = new Image ();
@@ -69,7 +56,8 @@ class Letter {
     this.y = y;
     this.width = width;
     this.height = height;
-    this.caught = false;
+    this.caught = false; // if caught by santa, the letter will take a true value. A filter() method 
+                        //created in //DRAWING ON CANVAS GAME will then remove it from letters[] and thus from the screen. 
     }
     draw(){
         if (score>0){
@@ -170,8 +158,11 @@ var santa = {
     },
 
     startWalking() {
-      if (this.walkInterval) {
+      if (this.walkInterval) { 
         return;
+        // When Santa stops walking (onkeyup), then walkInterval returns to a null 
+        // value. This condition thus stops startWalking();. In //COMMANDS, onekeyup trigs stopWalking().
+        // Without it, santa would walk indefinitely. 
       }
 
       this.walkInterval = setInterval(function () {
@@ -217,7 +208,10 @@ var snow = {
 var score = 8;
 var radius = 60;
 var zoomInterval = null;
+var red = "#e00d2d";
 var scoreDiv = {
+  flashInterval: null,
+  visible: true,
 
 
   scoreZoom (){
@@ -233,10 +227,30 @@ var scoreDiv = {
     }, 50);
   },
 
+  scoreClick (){
+    var count = 0;
+    this.flashInterval = setInterval(function () {
+      scoreDiv.visible = !scoreDiv.visible;
+      count++;
+
+      if (count === 6) {
+        clearInterval(scoreDiv.flashInterval);
+        scoreDiv.visible = true;
+      }
+    }, 150);
+  },
+
 draw(){
-  if (visible = true){
+  if (this.visible){
   ctxGame.beginPath(); 
   ctxGame.arc(1500, 120, radius, 0, 2 * Math.PI);
+  ctxGame.lineWidth = 6;
+  ctxGame.stroke();
+  ctxGame.font = "bold 70px monospace";
+  ctxGame.fillStyle = "white";
+  ctxGame.textAlign = "center";
+  ctxGame.textBaseline = "middle";
+  ctxGame.fillText(score, 1497, 120);
   //change circle color depending on score
   if (score>15){
     ctxGame.strokeStyle = "#42f462"; 
@@ -245,65 +259,54 @@ draw(){
   } else if (score>5){
     ctxGame.strokeStyle = "white"; 
   } else {
-    ctxGame.strokeStyle = "#e00d2d"; 
+    ctxGame.strokeStyle = red; 
   }
   //audio depending on score
-  if (score===0){
+  if (score<=0){
     laughLow.play();
     setTimeout(function(){
       laughLow.pause();
       laughLow.currentTime= 0;
-  }, 1000);
+  }, 2000);
   }
   if (score===10){
     laugh.play();
     setTimeout(function(){
       laugh.pause();
       laugh.currentTime= 0;
-  }, 1000);
+  }, 2000);
 }
   if (score===15){
     goodboy.play();
     setTimeout(function(){
       goodboy.pause();
       goodboy.currentTime= 0;
-  }, 1000);
+  }, 2500);
   }
   if (score===20){
     merry.play();
     setTimeout(function(){
       merry.pause();
       merry.currentTime= 0;
-  }, 1000);
+  }, 2000);
   }
-  // end of styling
-  ctxGame.lineWidth = 6;
-  ctxGame.stroke();
-  ctxGame.font = "bold 70px monospace";
-  ctxGame.fillStyle = "white";
-  ctxGame.textAlign = "center";
-  ctxGame.textBaseline = "middle";
-  ctxGame.fillText(score, 1497, 120);
   ctxGame.closePath();
+}}
 }
 
-}
-}
-
-
-//ANIMATE
+//ANIMATE BACKGROUND
 function back(){
     //generate snowflakes
-   var maxflakes = 100; //maxflakes
+   var maxflakes = 100; //maximum number of flakes
     var flakes = [];
     
-    //create flakes and apply attributes
-    for (var i = 0; i< maxflakes; i++){
+    //add 100 flakes to flakes[] and apply them 4 random attributes: x, y, radius, density.
+    for (i = 0; i< maxflakes; i++){
       flakes.push({
         x: Math.random()*W,
         y: Math.random()*H,
-        r: Math.random()*5+2, 
-       d: Math.random() + 1});
+        r: Math.random()*5+2, //so each flake can't be bigger than 7px and smaller than 2px.
+       d: Math.random() + 1}); // We will use this value to move flake.y. Bigger the density, quicker it reaches the ground.
     }
     
     //draw flakes on canvas
@@ -311,27 +314,27 @@ function back(){
       ctxSky.clearRect(0, 0, W, H);
       ctxSky.fillStyle = "white";
       ctxSky.beginPath();
-      for(var i = 0; i < maxflakes; i++){
-        var flake = flakes[i];
-        ctxSky.moveTo(flake.x, flake.y);
-        ctxSky.arc(flake.x, flake.y, flake.r, 0, Math.PI*2, true);    
-      }
-      
-      ctxSky.fill();
+      flakes.forEach(flake =>{
+        ctxSky.arc(flake.x, flake.y, flake.r, 0, Math.PI*2, true); 
+        ctxSky.moveTo(flake.x, flake.y); // place the flakes to it x,y coordinates.
+      })
+    
+      ctxSky.fill(); // draw each flake according to its properties.
       moveFlakes();
     }
       var angle= 0;
      
       function moveFlakes(){
         angle += 0.01;
-        for (var i = 0; i < maxflakes; i++){
+        for (i = 0; i < maxflakes; i++){
           var flake = flakes[i];
-          //Update flake x,y.
-          flake.y += Math.pow(flake.d, 2) + 1,
-            //math.sin creates a sinusoidal effect in x,y => more realistic fall..
-          flake.x += Math.sin(angle) * 2;
-          //when flake disspaears, send a new one from top
-          if(flake.y > 700){
+          flake.y += Math.pow(flake.d, 2) + 1, // Move flake.y position according to density value instead of a basic 
+                                              //value such as +2px. Each flake thus has a different speed.
+                                              //Math.pow(a,b) => a exponent b. Here: flake.density^2 + 1.
+          flake.x += Math.sin(angle) * 2; //Move flake.x position. Math.sin returns the sinus of an angle (always 
+                                          // between -1 and 1). x value is multiplied by 2 in order to give a more 
+                                          // visible effect. Since angle +=0.01 on each iteration, the flake will fall like an "S".
+          if(flake.y > 700){ //When flake reach the ground, send a new one from top.
             flakes[i] = {
               x: Math.random()*W,
               y: 0,
@@ -356,29 +359,29 @@ function drawEverything(){
 
    letters.forEach(oneletter =>{
        oneletter.draw();
-       if (!oneletter.caught && checkCollision (santa, oneletter)){
+       if (!oneletter.caught && checkCollision (santa, oneletter)){ //If the letter has a false value (set by default), and the colission is true, 
+                                                                    // then its value becomes true so the score only gains 1pt. Otherwise,
+                                                                    //the score would evolve during all the contact duration between santa and the letter.
          score+=1;
          oneletter.caught = true;
          letterHit.x= oneletter.x;
          letterHit.y= oneletter.y;
          letterHit.draw();    
-         bell.play();
          if (score === 10 || score === 15){
           scoreDiv.scoreZoom ();
          }
-         letters.push(new Letter (Math.floor(Math.random()* W), 0, 50, 50));
-
-
-        
-    setTimeout(function(){
-      bell.pause();
-      bell.currentTime= 0;
-  }, 1000);
-       }
+         letters.push(new Letter (Math.floor(Math.random()* W), 0, 50, 50)); // A new letter is pushed inside letters[] array so it's never empty.
+         bell.play();     
+           setTimeout(function(){ //After 1 second, bell.wav stops playing. Otherwise, it would be an endless loop by efault. 
+           bell.pause();
+           bell.currentTime= 0;
+           }, 1000);
+           }
       })
-
       letters = letters.filter (oneletter =>{
-        return !oneletter.caught 
+        return !oneletter.caught //Caught letters now have a true value. We return a new filtered array expurgated 
+                                // from them, and use it as our new letters[] array. Therefore, as soon as a letter is caught
+                                //it disappear from the screen because it doesn't belong to letters[] anymore and thus can't be drawn.
       })
 
     angryLetters.forEach(aletter =>{
@@ -388,9 +391,14 @@ function drawEverything(){
           aletter.caught = true;
           santa.santaClick();
           scoreDiv.scoreClick();
+          pain.play();
+            setTimeout(function(){
+            pain.pause();
+            pain.currentTime= 0;
+            }, 2000);
         }
        })
-if (score===0){
+if (score<=0){
   ctxGame.drawImage(gameoverImg, 600, 100, 560, 700);
   ctxGame.font = "bold 25px monospace";
   ctxGame.fillText("PRESS ENTER TO PLAY AGAIN", 880, 70);
@@ -427,6 +435,15 @@ function checkCollision(a, b){
 
 // SET GAME CONTROL 
 document.onkeydown = function (event){
+  switch (event.keyCode){
+  case 13: //ENTER
+    restart();
+    break;
+  }
+
+  if (score===20 || score<=0){
+    return;
+  } 
   santa.startWalking();
   switch (event.keyCode){
     case 37: //<=
@@ -439,20 +456,8 @@ document.onkeydown = function (event){
     santa.x += 20;
     break;
 
-    case 13: //ENTER
-    restart();
-    break;
 }
-  
-
-  if (score===20 || score===0){
-    return;
-  }
-
-    
 };
-
-
 document.onkeyup = function (){
   santa.stopWalking();
 };
@@ -483,5 +488,3 @@ function restart(){
       new Letter (Math.floor(Math.random()* W), -1900, 50, 50),
       ];
 }
-
-//};
