@@ -409,6 +409,7 @@ if (score===20){
   ctxGame.drawImage(winImg, 600, 100, 560, 700);
   ctxGame.font = "bold 25px monospace";
   ctxGame.fillText("PRESS ENTER TO PLAY AGAIN", 880, 70);
+  return;
 }
 };
 
