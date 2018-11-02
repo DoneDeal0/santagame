@@ -136,7 +136,7 @@ var letterHit = {
 // CREATE SANTA
 var santa = {
     x: 300, 
-    y: 572,
+    y: canvas.height -223,
     width: 150,
     height: 150,
     spriteX: 0,
@@ -195,7 +195,7 @@ var santa = {
 // CREATE SNOW TOP
 var snow = {
     x: 0, 
-    y: 555,
+    y: canvas.height - 235,
     width: 1800,
     height: 300,
     image: snowImg,
@@ -334,7 +334,7 @@ function back(){
           flake.x += Math.sin(angle) * 2; //Move flake.x position. Math.sin returns the sinus of an angle (always 
                                           // between -1 and 1). x value is multiplied by 2 in order to give a more 
                                           // visible effect. Since angle +=0.01 on each iteration, the flake will fall like an "S".
-          if(flake.y > 700){ //When flake reach the ground, send a new one from top.
+          if(flake.y > canvas.height - 90){ //When flake reach the ground, send a new one from top.
             flakes[i] = {
               x: Math.random()*W,
               y: 0,
@@ -351,7 +351,7 @@ function drawEverything(){
     ctxGame.fillStyle ="#102a54";//background
     ctxGame.fillRect(0, 0, W, H);
     ctxGame.fillStyle= "#F7F4FA";
-    ctxGame.fillRect(0, 710, W, 210);//snow-bottom
+    ctxGame.fillRect(0, canvas.height - 80, W, 210);//snow-bottom
     santa.draw();
     scoreDiv.draw();
     snow.draw();
