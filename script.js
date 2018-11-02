@@ -196,7 +196,7 @@ var santa = {
 var snow = {
     x: 0, 
     y: canvas.height - 235,
-    width: 1800,
+    width: W,
     height: 300,
     image: snowImg,
     draw(){
