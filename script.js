@@ -243,14 +243,14 @@ var scoreDiv = {
 draw(){
   if (this.visible){
   ctxGame.beginPath(); 
-  ctxGame.arc(canvas.width - 100, 120, radius, 0, 2 * Math.PI);
+  ctxGame.arc(canvas.width - 115, 120, radius, 0, 2 * Math.PI);
   ctxGame.lineWidth = 6;
   ctxGame.stroke();
   ctxGame.font = "bold 70px monospace";
   ctxGame.fillStyle = "white";
   ctxGame.textAlign = "center";
   ctxGame.textBaseline = "middle";
-  ctxGame.fillText(score, canvas.width - 100, 120);
+  ctxGame.fillText(score, canvas.width - 115, 120);
   //change circle color depending on score
   if (score>15){
     ctxGame.strokeStyle = "#42f462"; 
@@ -357,14 +357,16 @@ function drawEverything(){
     snow.draw();
 
     if (score<=0){
-      ctxGame.drawImage(gameoverImg, canvas.width/2 - 560/2, 100, 560, 700);
+      var newWidth = canvas.height*0.64;
+      ctxGame.drawImage(gameoverImg, canvas.width/2 - newWidth/2, 100, newWidth, canvas.height * 0.7);
       ctxGame.font = "bold 25px monospace";
       ctxGame.fillText("PRESS ENTER TO PLAY AGAIN", canvas.width/2, 70);
       return;
     }
     
     if (score >= 20){
-      ctxGame.drawImage(winImg, canvas.width/2 - 560/2, 100, 560, 700);
+      var newWidth = canvas.height*0.64;
+      ctxGame.drawImage(winImg, canvas.width/2 - newWidth/2, 100, newWidth, canvas.height * 0.7);
       ctxGame.font = "bold 25px monospace";
       ctxGame.fillText("PRESS ENTER TO PLAY AGAIN", canvas.width/2, 70);
       return;
@@ -467,7 +469,7 @@ document.onkeyup = function (){
 function restart(){
   score = 8; 
   santa.x = 300; 
-  santa.y = 572;
+  santa.y = canvas.height -223;
   santa.stopWalking();
 
   angryLetters = [
